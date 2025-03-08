@@ -68,7 +68,7 @@ userRouter.patch("/", async (req, res) => {
     const result = await deleteSession({ userEmail, token });
 
     // if token and email exist in our session, proceed, else don't proceed
-    if (!result?.acknowledged) {
+    if (!result) {
       return buildErrorResponse(res, "Invalid Link");
     }
 
