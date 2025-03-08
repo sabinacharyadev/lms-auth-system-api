@@ -1,0 +1,11 @@
+import userModel from "../schema/userSchema.js";
+
+// create a user
+export const createUser = (userObj) => {
+  return userModel(userObj).save();
+};
+
+// Update User
+export const updateUser = (filter, updatedUser) => {
+  return userModel.findOneAndUpdate(filter, updatedUser, { new: true });
+};
