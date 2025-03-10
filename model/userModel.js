@@ -9,3 +9,8 @@ export const createUser = (userObj) => {
 export const updateUser = (filter, updatedUser) => {
   return userModel.findOneAndUpdate(filter, updatedUser, { new: true });
 };
+
+// Find user by email
+export const findUserByEmail = (email) => {
+  return userModel.findOne({ email });
+};

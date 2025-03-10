@@ -11,6 +11,7 @@ import {
   buildErrorResponse,
   buildSuccessResponse,
 } from "../utility/responseHelper.js";
+import { refreshAuth, userAuth } from "../middlewares/authMiddleware.js";
 
 const userRouter = express.Router();
 
@@ -87,6 +88,82 @@ userRouter.patch("/", async (req, res) => {
       : buildErrorResponse(res, "Could not verify");
   } catch (error) {
     buildErrorResponse(res, "Could not verify");
+  }
+});
+
+userRouter.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    // Find user in database
+    const user = await findUserByEmail(email);
+
+    // if no user found
+    if (!user?._id) {
+      buildErrorResponse(res, "Invalid Credentials");
+      return;
+    }
+
+    // check if user is verified
+    if (!user?.isVerified) {
+      buildErrorResponse(res, "Please verify your account before login");
+      return;
+    }
+
+    // compare password
+    const isPasswordMatched = comparePassword(password, user.password);
+
+    if (!isPasswordMatched) {
+      buildErrorResponse(res, "Invalid Credentials");
+      return;
+    }
+
+    // Build JWT
+    const jwt = generateJWT(user.email);
+
+    // add to session storage
+    const sessionStorage = await createSession({
+      userEmail: user.email,
+      token: jwt.accessJWT,
+    });
+
+    sessionStorage?._id
+      ? buildSuccessResponse(res, jwt, "logged In successfully")
+      : buildErrorResponse(res, "Could not start session");
+  } catch (error) {
+    buildErrorResponse(res, "Invalid Credentials");
+  }
+});
+
+// Private Endpoint
+// GET user
+userRouter.get("/", userAuth, async (req, res) => {
+  try {
+    buildSuccessResponse(res, req.userInfo);
+  } catch (error) {
+    buildErrorResponse(res, "User not found");
+  }
+});
+
+// GET Access token - private route
+userRouter.get("/accessjwt", refreshAuth, async (req, res) => {
+  try {
+    if (req.userInfo) {
+      const { email } = req.userInfo;
+      // Build JWT
+      const accessJWT = generateAccessJWT(email);
+
+      // add to session storage
+      const sessionStorage = await createSession({
+        userEmail: email,
+        token: accessJWT,
+      });
+
+      sessionStorage?._id
+        ? buildSuccessResponse(res, accessJWT, "")
+        : buildErrorResponse(res, "Invalid token!!");
+    }
+  } catch (error) {
+    buildErrorResponse(res, "Invalid token!!");
   }
 });
 
