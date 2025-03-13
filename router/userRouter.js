@@ -1,6 +1,6 @@
 import express from "express";
-import { hashPassword } from "../utility/bcryptHelper.js";
-import { createUser, updateUser } from "../model/userModel.js";
+import { comparePassword, hashPassword } from "../utility/bcryptHelper.js";
+import { createUser, findUserByEmail, updateUser } from "../model/userModel.js";
 import { v4 as uuidv4 } from "uuid";
 import { createSession, deleteSession } from "../model/sessionModel.js";
 import {
@@ -12,6 +12,7 @@ import {
   buildSuccessResponse,
 } from "../utility/responseHelper.js";
 import { refreshAuth, userAuth } from "../middlewares/authMiddleware.js";
+import { generateJWT } from "../utility/jwtHelper.js";
 
 const userRouter = express.Router();
 
@@ -130,7 +131,9 @@ userRouter.post("/login", async (req, res) => {
       ? buildSuccessResponse(res, jwt, "logged In successfully")
       : buildErrorResponse(res, "Could not start session");
   } catch (error) {
-    buildErrorResponse(res, "Invalid Credentials");
+    console.log(error);
+
+    buildErrorResponse(res, "Something went wrong");
   }
 });
 
