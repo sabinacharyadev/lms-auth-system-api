@@ -3,16 +3,13 @@ import { comparePassword, hashPassword } from "../utility/bcryptHelper.js";
 import { createUser, findUserByEmail, updateUser } from "../model/userModel.js";
 import { v4 as uuidv4 } from "uuid";
 import { createSession, deleteSession } from "../model/sessionModel.js";
-import {
-  sendVerificationEmail,
-  sendVerifiedEmail,
-} from "../utility/nodeMailerHelper.js";
+import { sendVerificationEmail } from "../utility/nodeMailerHelper.js";
 import {
   buildErrorResponse,
   buildSuccessResponse,
 } from "../utility/responseHelper.js";
+import { generateAccessJWT, generateJWT } from "../utility/jwtHelper.js";
 import { refreshAuth, userAuth } from "../middlewares/authMiddleware.js";
-import { generateJWT } from "../utility/jwtHelper.js";
 
 const userRouter = express.Router();
 
@@ -65,23 +62,22 @@ userRouter.patch("/", async (req, res) => {
   try {
     // get userEmail and token from req body
     const { userEmail, token } = req.body;
-
     // check if the userEMail and token record exist in our session
     const result = await deleteSession({ userEmail, token });
 
-    // if token and email exist in our session, proceed, else don't proceed
-    if (!result) {
-      return buildErrorResponse(res, "Invalid Link");
+    // // if token and email exist in our session, proceed, else don't proceed
+    if (!result?._id) {
+      buildErrorResponse(res, "Invalid Link");
+      return;
     }
 
     // Valid Link
-
     // Go and find the user in the db and update it
     const user = await updateUser({ email: userEmail }, { isVerified: true });
 
     if (user?._id) {
       // send verified email
-      sendVerifiedEmail(user.email, user.name);
+      // assignment
     }
 
     user?._id
@@ -131,9 +127,7 @@ userRouter.post("/login", async (req, res) => {
       ? buildSuccessResponse(res, jwt, "logged In successfully")
       : buildErrorResponse(res, "Could not start session");
   } catch (error) {
-    console.log(error);
-
-    buildErrorResponse(res, "Something went wrong");
+    buildErrorResponse(res, "Invalid Credentials");
   }
 });
 
@@ -167,6 +161,21 @@ userRouter.get("/accessjwt", refreshAuth, async (req, res) => {
     }
   } catch (error) {
     buildErrorResponse(res, "Invalid token!!");
+  }
+});
+
+//LOGOUT USER
+userRouter.post("/logout", userAuth, async (req, res) => {
+  try {
+    const { email } = req.body;
+    const { authorization } = req.headers;
+
+    //remove session for the user
+    await deleteSession({ token: authorization, userEmail: email });
+
+    buildSuccessResponse(res, {}, "Bye, See you again!!");
+  } catch (error) {
+    buildErrorResponse(res, error.message);
   }
 });
 
