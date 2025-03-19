@@ -3,7 +3,10 @@ import { comparePassword, hashPassword } from "../utility/bcryptHelper.js";
 import { createUser, findUserByEmail, updateUser } from "../model/userModel.js";
 import { v4 as uuidv4 } from "uuid";
 import { createSession, deleteSession } from "../model/sessionModel.js";
-import { sendVerificationEmail } from "../utility/nodeMailerHelper.js";
+import {
+  sendVerificationEmail,
+  sendVerifiedEmail,
+} from "../utility/nodeMailerHelper.js";
 import {
   buildErrorResponse,
   buildSuccessResponse,
@@ -78,6 +81,7 @@ userRouter.patch("/", async (req, res) => {
     if (user?._id) {
       // send verified email
       // assignment
+      sendVerifiedEmail(user.email, user.name);
     }
 
     user?._id
