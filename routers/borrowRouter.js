@@ -1,5 +1,9 @@
 import express from "express";
-import { createBorrow, getManyBorrows } from "../model/borrowModel.js";
+import {
+  createBorrow,
+  getManyBorrows,
+  updateBorrow,
+} from "../model/borrowModel.js";
 import {
   buildErrorResponse,
   buildSuccessResponse,
@@ -56,6 +60,40 @@ borrowRouter.post("/", userAuth, async (req, res) => {
       res,
       "Unable to burrow the book , please contact adminstration."
     );
+  }
+});
+
+// Update Borrow / Return Borrow
+borrowRouter.patch("/", userAuth, async (req, res) => {
+  try {
+    const { borrowId } = req.body;
+
+    const updatedBorrow = {
+      _id: borrowId,
+      is_returned: true,
+      return_date: Date(),
+    };
+
+    const borrow = await updateBorrow(updatedBorrow);
+
+    // if the borrow is returned, we update the book's availabilty
+    if (borrow?._id) {
+      await updateBookById({
+        id: borrow.book_id,
+        status: "available",
+        due_date: null,
+      });
+    }
+
+    borrow?._id
+      ? buildSuccessResponse(
+          res,
+          borrow,
+          "You have successfully returned the book"
+        )
+      : buildErrorResponse(res, "Unable to return the borrowed book");
+  } catch (error) {
+    buildErrorResponse(res, "Unable to return the borrowed book");
   }
 });
 

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { reviewSchema } from "./reviewSchema.js";
 
 const bookSchema = new mongoose.Schema(
   {
@@ -41,6 +42,10 @@ const bookSchema = new mongoose.Schema(
         type: String,
       },
     ],
+    reviews: {
+      type: [reviewSchema],
+      default: [],
+    },
   },
   {
     timestamps: true,

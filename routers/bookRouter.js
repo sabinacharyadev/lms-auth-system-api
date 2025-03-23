@@ -64,7 +64,7 @@ bookRouter.post("/", userAuth, newBookValidation, async (req, res) => {
   } catch (error) {
     if (error.code === 11000) {
       error.message =
-        "There is another book that has similar ISBN. Please change the isbn and try again";
+        "There is another book that has similar ISBN. Plase change the isbn and try again";
     }
     buildErrorResponse(res, error.message);
   }
@@ -99,7 +99,7 @@ bookRouter.patch(
     } catch (error) {
       if (error.code === 11000) {
         error.message =
-          "There is another book that has similar ISBN. Please change the isbn and try again";
+          "There is another book that has similar ISBN. Plase change the isbn and try again";
       }
       buildErrorResponse(res, error.message);
     }

@@ -46,30 +46,3 @@ export const sendVerificationEmail = (email, name, verificationUrl) => {
 
   sendEmail(emailObject);
 };
-
-export const sendVerifiedEmail = (email, name) => {
-  const emailObject = {
-    from: process.env.SMTP_USER,
-    to: email,
-    subject: "Email Verified For your Account",
-    html: `
-    <table style="width: 100%; max-width: 600px; margin: 0 auto; padding: 20px; border-collapse: collapse;">
-        <tr>
-            <td style="text-align: center;">
-                <h1>Account Verification</h1>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <p>Dear ${name},</p>
-                <p>Thank you for signing up with us. Your email is now verified</p>
-                <p>If you did not sign up for an account, please ignore this email.</p>
-                <p>Thank you,<br> LMS</p>
-            </td>
-        </tr>
-    </table>
-    `,
-  };
-
-  sendEmail(emailObject);
-};

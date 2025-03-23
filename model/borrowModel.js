@@ -9,3 +9,9 @@ export const createBorrow = (borrowObj) => {
 export const getManyBorrows = (filter) => {
   return borrowModel.find(filter);
 };
+
+// update
+export const updateBorrow = (updatedBurrow) => {
+  const { _id } = updatedBurrow;
+  return borrowModel.findByIdAndUpdate(_id, updatedBurrow, { new: true });
+};

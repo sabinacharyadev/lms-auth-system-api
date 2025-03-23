@@ -1,17 +1,12 @@
 import mongoose from "mongoose";
 
-const DATABASE = "auth-system";
-const CONNECTION_URI = process.env.CONNECTION_URI + DATABASE;
-
-export const connectToMongoDB = () => {
+export const connectToMongoDb = () => {
   try {
-    const connect = mongoose.connect(CONNECTION_URI);
+    const connect = mongoose.connect(process.env.CONNECTION_URI);
     if (connect) {
-      console.log(
-        `Database connected successfully at ${process.env.CONNECTION_URI}`
-      );
+      console.log(`Database connected: ${process.env.CONNECTION_URI}`);
     }
   } catch (error) {
-    console.log(error);
+    console.log("Error:", error);
   }
 };
